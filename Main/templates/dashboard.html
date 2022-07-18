@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<main>
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mt-3 p-1 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">Welcome {{request.user}},</h5>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="container">
+    <div class="row">
+        {% if files %}
+        {% for file in files %}
+        <div class="col-md-4 gy-2">
+            <div class="card p-1 shadow">
+                <div class="card-body">
+                  <h5 class="card-title mb-2">{{file.title}}</h5>
+                  <h6 class="card-subtitle text-muted mb-2">Created by: {{request.user}}</h6>
+                  <h6 class="card-subtitle text-muted mb-2">Created: {{file.date}}</h6>
+                  <p class="card-text mb-2">{{file.description}}</p>
+                  <a href="{{file.file.url}}" class="btn btn-primary" download>Download File</a>
+                  <a href="{% url 'deleteFile' file.id %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <div class="col-md-4">
+            <div class="card p-1 shadow">
+                <div class="card-body">
+                    <h5 class="card-title">You have no files</h5>
+                    <h6 class="card-subtitle text-muted">Uploaded Files will be displayed here</h6>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <a href="{% url 'addFile' %}" class="btn btn-primary mt-3">Upload a File</a>
+    </div>
+</div>
+
+</main>
+{% endblock content %}
+
