@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
 import uuid
-
+from django.db.models import Q
 from Main.models import Files
 
 # Create your views here.
@@ -15,7 +15,12 @@ def landing(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    files = Files.objects.filter(owner=request.user)
+    search_query = ''
+
+    if request.GET.get('search_query'):
+        search_query = request.GET.get('search_query')
+
+    files = Files.objects.filter(Q(title__icontains=search_query), Q(description__icontains=search_query),owner=request.user)
     title = 'Dashboard'
     context = {'title':title, 'files':files}
     return render(request, 'dashboard.html', context)
