@@ -114,28 +114,36 @@ def register(request):
     return redirect('dashboard')
 
 
+from django.utils.http import url_has_allowed_host_and_scheme
+
 def loginUser(request):
+    next_url = request.GET.get('next') or request.POST.get('next')
+
     if request.method == 'GET':
         if request.user.is_authenticated:
+            if next_url and url_has_allowed_host_and_scheme(url=next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+                return redirect(next_url)
             return redirect('dashboard')
-        return render(request, 'login.html', {'title': 'Log In'})
+        return render(request, 'login.html', {'title': 'Log In', 'next': next_url})
 
     username = request.POST.get('username', '').strip()
     password = request.POST.get('password', '')
 
     if not User.objects.filter(username=username).exists():
         messages.error(request, 'No account found with that username.')
-        return render(request, 'login.html', {'title': 'Log In'})
+        return render(request, 'login.html', {'title': 'Log In', 'next': next_url})
 
     user = authenticate(request, username=username, password=password)
 
     if user is not None:
         login(request, user)
         messages.success(request, 'Logged in successfully!')
+        if next_url and url_has_allowed_host_and_scheme(url=next_url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+            return redirect(next_url)
         return redirect('dashboard')
 
     messages.error(request, 'Incorrect password. Please try again.')
-    return render(request, 'login.html', {'title': 'Log In'})
+    return render(request, 'login.html', {'title': 'Log In', 'next': next_url})
 
 
 @require_POST

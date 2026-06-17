@@ -46,3 +46,16 @@ class Files(models.Model):
 
     def __str__(self):
         return self.title or '(untitled)'
+
+
+import os
+from django.dispatch import receiver
+
+@receiver(models.signals.post_delete, sender=Files)
+def auto_delete_file_on_delete(sender, instance, **kwargs):
+    """
+    Deletes file from filesystem when corresponding `Files` object is deleted.
+    """
+    if instance.file:
+        if os.path.isfile(instance.file.path):
+            os.remove(instance.file.path)
