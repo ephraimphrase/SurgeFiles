@@ -3,20 +3,110 @@
 
 {% block content %}
 <main>
-    <div class="row">
-        <div class="col-md-5">
-            <div class="card ms-3 mt-3 shadow p-1">
-                <div class="card-body">
-                    <form action="{% url 'addFile' %}" method="POST" enctype="multipart/form-data">
-                        {% csrf_token %}
-                        <input type="text" class="form-control mb-2" placeholder="Title" name="title">
-                        <input type="text" class="form-control mb-2" placeholder="Description" name="description">
-                        <input class="form-control mb-2" type="file" id="formFile" name="file">
-                        <button class="btn btn-primary" type="submit">Add File</button>
-                    </form>
+    <div class="container">
+        <div class="row justify-content-start mt-4">
+            <div class="col-md-6 col-lg-5">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4"><i class="bi bi-upload me-2"></i>Upload a File</h4>
+                        <form action="{% url 'addFile' %}" method="POST" enctype="multipart/form-data" id="uploadForm">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="fileTitle" class="form-label">Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="fileTitle" placeholder="Give your file a name" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileDescription" class="form-label">Description</label>
+                                <input type="text" class="form-control" id="fileDescription" placeholder="Optional description" name="description">
+                            </div>
+                            <div class="mb-3">
+                                <label for="fileFolder" class="form-label">Folder</label>
+                                <select class="form-select" id="fileFolder" name="folder">
+                                    <option value="">No folder (root)</option>
+                                    {% for folder in folders %}
+                                    <option value="{{ folder.id }}">{{ folder.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="form-label">File <span class="text-danger">*</span></label>
+                                <!-- Drag & Drop Zone -->
+                                <div id="dropZone" class="border border-2 border-dashed rounded-3 p-4 text-center"
+                                     style="cursor: pointer; border-color: #dee2e6 !important; transition: all 0.2s ease;">
+                                    <i class="bi bi-cloud-arrow-up fs-1 text-muted" id="dropIcon"></i>
+                                    <p class="mb-0 mt-2 text-muted" id="dropText">
+                                        Drag & drop your file here, or <span class="text-primary fw-semibold">click to browse</span>
+                                    </p>
+                                    <p class="mb-0 mt-1 text-success fw-semibold d-none" id="fileNameDisplay"></p>
+                                </div>
+                                <input class="form-control d-none" type="file" id="fileUpload" name="file" required>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-primary" type="submit" id="uploadBtn">
+                                    <i class="bi bi-upload me-1"></i>Upload
+                                </button>
+                                <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </main>
+
+<script>
+(function() {
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileUpload');
+    const dropText = document.getElementById('dropText');
+    const dropIcon = document.getElementById('dropIcon');
+    const fileNameDisplay = document.getElementById('fileNameDisplay');
+
+    // Click to browse
+    dropZone.addEventListener('click', () => fileInput.click());
+
+    // Drag events
+    ['dragenter', 'dragover'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#0d6efd';
+            dropZone.style.backgroundColor = '#f0f7ff';
+        });
+    });
+
+    ['dragleave', 'drop'].forEach(evt => {
+        dropZone.addEventListener(evt, (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.style.borderColor = '#dee2e6';
+            dropZone.style.backgroundColor = '';
+        });
+    });
+
+    // Handle drop
+    dropZone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            showFileName(files[0].name);
+        }
+    });
+
+    // Handle file input change
+    fileInput.addEventListener('change', () => {
+        if (fileInput.files.length > 0) {
+            showFileName(fileInput.files[0].name);
+        }
+    });
+
+    function showFileName(name) {
+        dropText.classList.add('d-none');
+        dropIcon.className = 'bi bi-file-earmark-check fs-1 text-success';
+        fileNameDisplay.textContent = name;
+        fileNameDisplay.classList.remove('d-none');
+    }
+})();
+</script>
 {% endblock content %}

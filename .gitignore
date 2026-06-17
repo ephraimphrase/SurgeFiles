@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment
+.env
+venv/
+env/
+ENV/
+
+# Database
+db.sqlite3
+db.sqlite3-journal
+
+# Uploaded Files
+static/images/uploads/
+media/
+uploads/
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Static files collected during deployment
+staticfiles/
